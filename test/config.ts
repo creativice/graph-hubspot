@@ -7,10 +7,12 @@ if (process.env.LOAD_ENV) {
     path: path.join(__dirname, '../.env'),
   });
 }
-const DEFAULT_CLIENT_ID = 'dummy-acme-client-id';
-const DEFAULT_CLIENT_SECRET = 'dummy-acme-client-secret';
+const DEFAULT_API_KEY = 'dummy-api-key';
+const DEFAULT_API_URL = 'https://api.hubapi.com';
 
-export const integrationConfig: IntegrationConfig = {
-  clientId: process.env.CLIENT_ID || DEFAULT_CLIENT_ID,
-  clientSecret: process.env.CLIENT_SECRET || DEFAULT_CLIENT_SECRET,
-};
+export function createIntegrationConfig(): IntegrationConfig {
+  return {
+    apiKey: process.env.API_KEY || DEFAULT_API_KEY,
+    apiBaseUrl: process.env.API_BASE_URL || DEFAULT_API_URL,
+  };
+}
