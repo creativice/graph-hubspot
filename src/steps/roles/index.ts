@@ -8,10 +8,11 @@ import { Entities, IntegrationSteps } from '../constants';
 import { createRoleEntity } from './converters';
 
 export async function fetchRoles({
-  jobState,
   instance,
+  executionHistory,
+  jobState,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  const apiClient = createAPIClient(instance.config);
+  const apiClient = createAPIClient(instance.config, executionHistory);
   await apiClient.iterateRoles(async (role) => {
     await jobState.addEntity(createRoleEntity(role));
   });

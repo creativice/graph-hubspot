@@ -14,7 +14,12 @@ export function createUserEntity(data: Owner) {
         _class: Entities.USER._class,
         _type: Entities.USER._type,
         _key: getEntityKey(Entities.USER, data.id),
-        name: `${data.firstName} ${data.lastName}`,
+        id: data.id,
+        // Users can have firstName and lastName be blank
+        name:
+          data.firstName && data.lastName
+            ? `${data.firstName} ${data.lastName}`
+            : data.email,
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,

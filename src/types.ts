@@ -1,5 +1,38 @@
 export type ResourceIteratee<T> = (each: T) => Promise<void> | void;
 
+export interface HubspotRequestConfig {
+  /**
+   * Url Query params
+   */
+  params?: any;
+
+  /**
+   * Pagination start index
+   */
+  after?: string;
+}
+
+export interface HubspotPaginatedResponse {
+  results: any[];
+  paging: Paging;
+}
+
+export interface LegacyHubspotPaginatedResponse {
+  results: any[];
+  offset: number;
+  hasMore: boolean;
+  total: number;
+}
+
+export interface Paging {
+  next: Next;
+}
+
+export interface Next {
+  after: string;
+  link: string;
+}
+
 export interface Owner {
   firstName: string;
   lastName: string;
@@ -17,17 +50,39 @@ export interface Team {
   name: string;
 }
 export interface Company {
-  id: string;
+  companyId: number;
+  portalId: number;
   properties: CompanyProperties;
-  updatedAt: string;
-  createdAt: string;
-  archived: boolean;
-  archivedAt: string;
+  isDeleted: boolean;
 }
 export interface CompanyProperties {
-  name: string;
-  website: string;
-  domain: string;
+  name?: {
+    value: string;
+  };
+  website?: {
+    value: string;
+  };
+  domain?: {
+    value: string;
+  };
+  city?: {
+    value: string;
+  };
+  industry?: {
+    value: string;
+  };
+  hubspot_owner_id?: {
+    value: string;
+  };
+  is_public?: {
+    value: string;
+  };
+  createdate?: {
+    value: string;
+  };
+  hs_lastmodifieddate?: {
+    value: string;
+  };
   [key: string]: any;
 }
 export interface User {

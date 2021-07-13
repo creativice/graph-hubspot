@@ -52,6 +52,7 @@ describe('#fetchOwners', () => {
             items: { type: 'object' },
           },
           _type: { const: 'hubspot_user' },
+          id: { type: 'string' },
           name: { type: 'string' },
           firstName: { type: 'string' },
           lastName: { type: 'string' },

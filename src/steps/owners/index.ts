@@ -11,10 +11,11 @@ import { Entities, IntegrationSteps, Relationships } from '../constants';
 import { createUserEntity } from './converters';
 
 export async function fetchOwners({
-  jobState,
   instance,
+  executionHistory,
+  jobState,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  const apiClient = createAPIClient(instance.config);
+  const apiClient = createAPIClient(instance.config, executionHistory);
   await apiClient.iterateOwners(async (owner) => {
     const { roleId } = await apiClient.fetchUser(owner.userId.toString());
 

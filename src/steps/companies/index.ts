@@ -8,10 +8,11 @@ import { Entities, IntegrationSteps } from '../constants';
 import { createCompanyEntity } from './converters';
 
 export async function fetchCompanies({
-  jobState,
   instance,
+  executionHistory,
+  jobState,
 }: IntegrationStepExecutionContext<IntegrationConfig>) {
-  const apiClient = createAPIClient(instance.config);
+  const apiClient = createAPIClient(instance.config, executionHistory);
   await apiClient.iterateCompanies(async (company) => {
     await jobState.addEntity(createCompanyEntity(company));
   });

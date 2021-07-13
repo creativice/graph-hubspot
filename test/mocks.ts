@@ -25,16 +25,20 @@ export function getMockRole(partial?: Partial<Role>): Role {
 
 export function getMockCompany(partial?: Partial<Company>): Company {
   return {
-    id: '84106264',
+    companyId: 84106264,
+    portalId: 21406264,
+    isDeleted: false,
     properties: {
-      name: 'Awesome company',
-      domain: 'awesomecompanydomain.tld',
-      website: 'awesomecompanydomain.tld',
+      name: {
+        value: 'Awesome company',
+      },
+      domain: {
+        value: 'awesomecompanydomain.tld',
+      },
+      website: {
+        value: 'awesomecompanydomain.tld',
+      },
     },
-    createdAt: '2021-06-14T19:38:46.907Z',
-    updatedAt: '2021-06-14T19:38:46.907Z',
-    archivedAt: '2021-06-14T19:38:46.907Z',
-    archived: false,
     ...partial,
   };
 }
