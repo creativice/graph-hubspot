@@ -65,12 +65,8 @@ On `graph-hubspot`
 
 # How to Uninstall
 
-TODO: List specific actions that must be taken to uninstall the integration.
-Many of the following steps will be reusable; take care to be sure they remain
-accurate.
-
 1. From the configuration **Gear Icon**, select **Integrations**.
-2. Scroll to the **{{provider}}** integration tile and click it.
+2. Scroll to the **Hubspot** integration tile and click it.
 3. Identify and click the **integration to delete**.
 4. Click the **trash can** icon.
 5. Click the **Remove** button to delete the integration.
