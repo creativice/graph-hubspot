@@ -9,7 +9,7 @@ export interface HubspotRequestConfig {
   /**
    * Pagination start index
    */
-  after?: string;
+  pagination?: any;
 }
 
 export interface HubspotPaginatedResponse {

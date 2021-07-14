@@ -21,7 +21,7 @@ export class APIClient {
   private readonly apiBaseUrl: string;
   private readonly oauthAccessToken: string;
   private readonly executionHistory: ExecutionHistory;
-  private readonly legacyMaxPerPage = 30;
+  private readonly maxPerPage = 30;
 
   constructor(
     readonly integrationConfig: IntegrationConfig,
@@ -46,11 +46,10 @@ export class APIClient {
       data = await this.query<LegacyHubspotPaginatedResponse>(resource, {
         params: {
           ...config?.params,
-          count: this.legacyMaxPerPage,
+          count: this.maxPerPage,
           offset: data ? data.offset : 0,
         },
       });
-
       for (const it of data?.results || []) {
         await onEach(it);
       }
@@ -67,7 +66,7 @@ export class APIClient {
     do {
       data = await this.query<HubspotPaginatedResponse>(resource, {
         ...config,
-        ...pagination,
+        pagination,
       });
       pagination.after = data?.paging?.next?.after;
       for (const it of data?.results || []) {
@@ -82,27 +81,38 @@ export class APIClient {
     init?: RequestInit,
   ): Promise<T> {
     const url = new URL(`${this.apiBaseUrl}${resource}`);
-    const params = new URLSearchParams(config?.params).toString();
-    url.search = params.toString();
+    url.search = new URLSearchParams({
+      ...config?.params,
+      ...config?.pagination,
+    }).toString();
+    let response;
 
-    const res = await fetch(url, {
-      ...init,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.oauthAccessToken}`,
-      },
-    });
+    try {
+      response = await fetch(url, {
+        ...init,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.oauthAccessToken}`,
+        },
+      });
 
-    const data = await res.json();
-    if (!res.ok || data.status === 'error') {
+      const data = await response.json();
+      if (!response.ok || data.status === 'error') {
+        throw new IntegrationProviderAPIError({
+          endpoint: url.toString(),
+          status: response.status,
+          statusText: response.statusText,
+        });
+      }
+
+      return data as T;
+    } catch (err) {
       throw new IntegrationProviderAPIError({
         endpoint: url.toString(),
-        status: res.status,
-        statusText: res.statusText,
+        status: response.status,
+        statusText: response.statusText,
       });
     }
-
-    return data as T;
   }
 
   public async verifyAuthentication(): Promise<void> {
@@ -122,68 +132,39 @@ export class APIClient {
   }
 
   public async iterateOwners(iteratee: ResourceIteratee<Owner>) {
-    try {
-      await this.iterate<Owner>('/crm/v3/owners', iteratee);
-    } catch (err) {
-      throw new IntegrationProviderAPIError({
-        cause: err,
-        endpoint: `/crm/v3/owners`,
-        status: err.status,
-        statusText: err.statusText,
-      });
-    }
+    await this.iterate<Owner>('/crm/v3/owners', iteratee, {
+      params: {
+        limit: this.maxPerPage,
+      },
+    });
   }
 
   public async iterateRoles(iteratee: ResourceIteratee<Role>) {
-    try {
-      await this.iterate<Role>('/settings/v3/users/roles', iteratee);
-    } catch (err) {
-      throw new IntegrationProviderAPIError({
-        cause: err,
-        endpoint: `/settings/v3/users/roles`,
-        status: err.status,
-        statusText: err.statusText,
-      });
-    }
+    await this.iterate<Role>('/settings/v3/users/roles', iteratee, {
+      params: {
+        limit: this.maxPerPage,
+      },
+    });
   }
 
   public async fetchUser(userId: string): Promise<User> {
-    try {
-      const user = await this.get<User>(`/settings/v3/users/${userId}`);
-      return user;
-    } catch (err) {
-      throw new IntegrationProviderAPIError({
-        cause: err,
-        endpoint: `/settings/v3/users/{userId}`,
-        status: err.status,
-        statusText: err.statusText,
-      });
-    }
+    return this.get<User>(`/settings/v3/users/${userId}`);
   }
 
   // This seem to require legacy endpoint because we want to use `executionHistory`
   // with the following endpoint https://legacydocs.hubspot.com/docs/methods/companies/get_companies_modified
   public async iterateCompanies(iteratee: ResourceIteratee<Company>) {
-    try {
-      await this.iterateLegacy<Company>(
-        '/companies/v2/companies/recent/modified',
-        iteratee,
-        {
-          params: {
-            // If this is the first run, we want to get all companies once and later just the modified since
-            since: this.executionHistory.lastSuccessful?.startedOn || 0,
-            count: this.legacyMaxPerPage,
-          },
+    await this.iterateLegacy<Company>(
+      '/companies/v2/companies/recent/modified',
+      iteratee,
+      {
+        params: {
+          // If this is the first run, we want to get all companies once and later just the modified since
+          since: this.executionHistory.lastSuccessful?.startedOn || 0,
+          count: this.maxPerPage,
         },
-      );
-    } catch (err) {
-      throw new IntegrationProviderAPIError({
-        cause: err,
-        endpoint: `/crm/v3/objects/companies`,
-        status: err.status,
-        statusText: err.statusText,
-      });
-    }
+      },
+    );
   }
 }
 
